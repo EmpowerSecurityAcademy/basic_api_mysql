@@ -51,8 +51,7 @@ def do_task(task_id):
 		return jsonify({'status_code': 200})
 
 	if request.method == 'DELETE':
-		print("DELETE * FROM tasks where id='" + str(task_id))
-		cursor.execute("DELETE * FROM tasks where id='" + str(task_id);
+		cursor.execute("DELETE FROM tasks where id=" + str(task_id));
 		conn.commit()
 		return jsonify({'status_code': 200})
 
