@@ -41,17 +41,14 @@ def do_tasks():
 
 	return jsonify({'status_code': '400'})
 
-
-
 # RESTFUL operations related to a specific task
 
 @app.route('/todo/api/v1.0/tasks/<task_id>', methods=['GET', 'DELETE'])
 def do_task(task_id):
-	task_id = int(task_id)
 	if request.method == 'GET':
-		for task in tasks:
-			if task['id'] == task_id:
-				return jsonify(task)
+		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
+		data = cursor.fetchone()
+		return json.dumps(data)
 
 	if request.method == 'DELETE':
 		for task in tasks:
