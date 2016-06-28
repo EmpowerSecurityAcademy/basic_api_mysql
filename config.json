@@ -1,8 +1,0 @@
-{
-	"database": {
-		"db_instance": "rest-api",
-		"user_name": "emp0wer",
-		"password": "bW!El;4K5-t1",
-		"connection_url": "rest-api.czobl26oai3n.us-west-2.rds.amazonaws.com"
-	}
-}
