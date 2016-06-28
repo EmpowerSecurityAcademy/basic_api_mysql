@@ -1,22 +1,22 @@
-#!flask/bin/python
-from flask import Flask, jsonify, request
+from flask import Flask, url_for, request
+from flask.ext.mysql import MySQL
+from import_config import load_config
+import json
 
+config = load_config()
+
+mysql = MySQL()
 app = Flask(__name__)
 
-tasks = [
-    {
-        'id': 1,
-        'title': u'Buy groceries',
-        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol', 
-        'done': False
-    },
-    {
-        'id': 2,
-        'title': u'Learn Python',
-        'description': u'Need to find a good Python tutorial on the web', 
-        'done': False
-    }
-]
+app.config['MYSQL_DATABASE_USER'] = config["database"]["user_name"]
+app.config['MYSQL_DATABASE_PASSWORD'] = config["database"]["password"]
+app.config['MYSQL_DATABASE_DB'] = config["database"]["db_instance"]
+app.config['MYSQL_DATABASE_HOST'] = config["database"]["connection_url"]
+
+mysql.init_app(app)
+
+conn = mysql.connect()
+cursor = conn.cursor()
 
 @app.route('/todo/api/v1.0/tasks', methods=['GET', 'POST', 'PUT'])
 def do_tasks():
