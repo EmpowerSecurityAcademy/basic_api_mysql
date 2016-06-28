@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request
+from flask import Flask, url_for, request, jsonify
 from flask.ext.mysql import MySQL
 from import_config import load_config
 import json
@@ -21,34 +21,34 @@ cursor = conn.cursor()
 @app.route('/todo/api/v1.0/tasks', methods=['GET', 'POST', 'PUT'])
 def do_tasks():
 	if request.method == 'GET':
-		return jsonify({'tasks': tasks})
+		cursor.execute("SELECT * from tasks")
+		data = cursor.fetchone()
+		return jsonify({'tasks': data})
 
 
 	if request.method == 'POST':
 		content = request.get_json(silent=True)
-		tasks.append(content)
+		cursor.execute("INSERT INTO tasks (title, description, done) VALUES('"+content['title'] +"', '"+ content['description'] +"', '"+ str(content['done']) + "')");
+		conn.commit()
 		return jsonify({'status_code': 201})
-
-	#return proper status_code is object not found in tasks
-	if request.method == 'PUT':
-		content = request.get_json(silent=True)
-		for x in tasks:
-			if x['id'] == content['id']:
-				x['title'] = content['title']
-				x['description'] = content['description']
-				x['done'] = content['done']
-		return jsonify({'status_code': 200})
 
 	return jsonify({'status_code': '400'})
 
 # RESTFUL operations related to a specific task
 
-@app.route('/todo/api/v1.0/tasks/<task_id>', methods=['GET', 'DELETE'])
+@app.route('/todo/api/v1.0/tasks/<task_id>', methods=['GET', 'PUT', 'DELETE'])
 def do_task(task_id):
 	if request.method == 'GET':
 		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
 		data = cursor.fetchone()
-		return json.dumps(data)
+		return jsonify({'task': data})
+
+	if request.method == 'PUT':
+		content = request.get_json(silent=True)
+		print("UPDATE tasks SET title='"+content['title'] +"', description='"+ content['description'] +"', done= '"+ str(content['done']) + "' where id='" + str(task_id))
+		cursor.execute("UPDATE tasks SET title='"+content['title'] +"', description='"+ content['description'] +"', done= '"+ str(content['done']) + "' where id=" + str(task_id));
+		conn.commit()
+		return jsonify({'status_code': 200})
 
 	if request.method == 'DELETE':
 		for task in tasks:
