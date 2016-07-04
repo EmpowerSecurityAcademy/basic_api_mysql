@@ -20,6 +20,14 @@ cursor = conn.cursor()
 
 url_root = '/todo/api/v3.0/'
 
+def format_json(element):
+	new_task = {}
+	new_task["id"] = element[0]
+	new_task["title"] = element[1]
+	new_task["description"] = element[2]
+	new_task["done"] = element[3]
+	return new_task
+
 @app.route(url_root+'tasks', methods=['GET', 'POST'])
 def do_tasks():
 	if request.method == 'GET':
@@ -27,21 +35,17 @@ def do_tasks():
 		data = cursor.fetchall()
 		data_response = []
 		for element in data:
-			new_task = {}
-			new_task["id"] = element[0]
-			new_task["title"] = element[1]
-			new_task["description"] = element[2]
-			new_task["done"] = element[3]
-			data_response.append(new_task)
+			task = format_json(element)
+			data_response.append(task)
 		return make_response(jsonify({'tasks': data_response}), 200)
 
 	if request.method == 'POST':
 		content = request.get_json(silent=True)
 		cursor.execute("INSERT INTO tasks (title, description, done) VALUES('"+content['title'] +"', '"+ content['description'] +"', '"+ str(content['done']) + "')");
 		conn.commit()
-		return make_response(jsonify({'inserted_id': cursor.lastrowid}), 201)
+		return make_response(jsonify({'id': cursor.lastrowid}), 201)
 
-	return make_response(jsonify({'status_code': '400'}), 400)
+	return make_response(jsonify({'status_code': '500'}), 500)
 
 # RESTFUL operations related to a specific task
 
@@ -51,7 +55,7 @@ def do_task(task_id):
 		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
 		data = cursor.fetchone()
 		if data != None:
-			return make_response(jsonify({'task': data}), 200)
+			return make_response(jsonify({'task': format_json(data)}), 200)
 		else:
 			return make_response(jsonify({'task': data}), 404)
 
@@ -61,15 +65,14 @@ def do_task(task_id):
 		conn.commit()
 		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
 		data = cursor.fetchone()
-		return make_response(jsonify({'task': data}), 200)
+		return make_response(jsonify({'task': format_json(data)}), 200)
 
 	if request.method == 'DELETE':
 		cursor.execute("DELETE FROM tasks where id=" + str(task_id));
 		conn.commit()
 		return make_response(jsonify({'deleted_id': task_id}), 200)
 
-	return make_response(jsonify({'status_code': '400'}), 400)
-
+	return make_response(jsonify({'status_code': '500'}), 500)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5003)
