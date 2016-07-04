@@ -8,10 +8,10 @@ config = load_config()
 mysql = MySQL()
 app = Flask(__name__)
 
-app.config['MYSQL_DATABASE_USER'] = config["database_mysql"]["user_name"]
-app.config['MYSQL_DATABASE_PASSWORD'] = config["database_mysql"]["password"]
-app.config['MYSQL_DATABASE_DB'] = config["database_mysql"]["db_instance"]
-app.config['MYSQL_DATABASE_HOST'] = config["database_mysql"]["connection_url"]
+app.config['MYSQL_DATABASE_USER'] = config["database"]["user_name"]
+app.config['MYSQL_DATABASE_PASSWORD'] = config["database"]["password"]
+app.config['MYSQL_DATABASE_DB'] = config["database"]["db_instance"]
+app.config['MYSQL_DATABASE_HOST'] = config["database"]["connection_url"]
 
 mysql.init_app(app)
 
@@ -25,6 +25,7 @@ def do_tasks():
 	if request.method == 'GET':
 		cursor.execute("SELECT * from tasks")
 		data = cursor.fetchone()
+		print(data)
 		return make_response(jsonify({'tasks': data}), 200)
 
 
@@ -34,7 +35,7 @@ def do_tasks():
 		conn.commit()
 		return make_response(jsonify({'status_code': 201}), 201)
 
-	return make_response(jsonify({'status_code': '404'}), 404)
+	return make_response(jsonify({'status_code': '400'}), 400)
 
 # RESTFUL operations related to a specific task
 
@@ -57,7 +58,7 @@ def do_task(task_id):
 		conn.commit()
 		return make_response(jsonify({'deleted_id': task_id}), 200)
 
-	return make_response(jsonify({'status_code': '404'}), 404)
+	return make_response(jsonify({'status_code': '400'}), 400)
 
 
 if __name__ == '__main__':
