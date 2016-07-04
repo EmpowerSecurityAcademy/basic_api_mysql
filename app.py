@@ -20,12 +20,11 @@ cursor = conn.cursor()
 
 url_root = '/todo/api/v3.0/'
 
-@app.route(url_root+'tasks', methods=['GET', 'POST', 'PUT'])
+@app.route(url_root+'tasks', methods=['GET', 'POST'])
 def do_tasks():
 	if request.method == 'GET':
 		cursor.execute("SELECT * from tasks")
 		data = cursor.fetchone()
-		print(data)
 		return make_response(jsonify({'tasks': data}), 200)
 
 
@@ -33,7 +32,7 @@ def do_tasks():
 		content = request.get_json(silent=True)
 		cursor.execute("INSERT INTO tasks (title, description, done) VALUES('"+content['title'] +"', '"+ content['description'] +"', '"+ str(content['done']) + "')");
 		conn.commit()
-		return make_response(jsonify({'status_code': 201}), 201)
+		return make_response(jsonify({'inserted_id': cursor.lastrowid}), 201)
 
 	return make_response(jsonify({'status_code': '400'}), 400)
 
@@ -44,14 +43,18 @@ def do_task(task_id):
 	if request.method == 'GET':
 		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
 		data = cursor.fetchone()
-		return make_response(jsonify({'task': data}), 200)
+		if data != None:
+			return make_response(jsonify({'task': data}), 200)
+		else:
+			return make_response(jsonify({'task': data}), 404)
 
 	if request.method == 'PUT':
 		content = request.get_json(silent=True)
-		print("UPDATE tasks SET title='"+content['title'] +"', description='"+ content['description'] +"', done= '"+ str(content['done']) + "' where id='" + str(task_id))
 		cursor.execute("UPDATE tasks SET title='"+content['title'] +"', description='"+ content['description'] +"', done= '"+ str(content['done']) + "' where id=" + str(task_id));
 		conn.commit()
-		return make_response(jsonify({'status_code': 200}), 200)
+		cursor.execute("SELECT * from tasks where id='" + task_id + "'")
+		data = cursor.fetchone()
+		return make_response(jsonify({'task': data}), 200)
 
 	if request.method == 'DELETE':
 		cursor.execute("DELETE FROM tasks where id=" + str(task_id));
