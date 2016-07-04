@@ -24,9 +24,16 @@ url_root = '/todo/api/v3.0/'
 def do_tasks():
 	if request.method == 'GET':
 		cursor.execute("SELECT * from tasks")
-		data = cursor.fetchone()
-		return make_response(jsonify({'tasks': data}), 200)
-
+		data = cursor.fetchall()
+		data_response = []
+		for element in data:
+			new_task = {}
+			new_task["id"] = element[0]
+			new_task["title"] = element[1]
+			new_task["description"] = element[2]
+			new_task["done"] = element[3]
+			data_response.append(new_task)
+		return make_response(jsonify({'tasks': data_response}), 200)
 
 	if request.method == 'POST':
 		content = request.get_json(silent=True)
