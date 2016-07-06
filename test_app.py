@@ -33,7 +33,6 @@ class AppTestCases(unittest.TestCase):
         conn = app.mysql.connect()
         cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS tasks")
-        print("drop tablegit ")
         conn.commit()
         cursor.execute("CREATE TABLE tasks(id int(11) NOT NULL AUTO_INCREMENT, title varchar(255), description varchar(255), done tinyint(1), PRIMARY KEY (id)) ")
         conn.commit()
